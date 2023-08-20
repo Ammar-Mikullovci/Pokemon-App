@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pokemon Project</title>
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css"
+    />
+    <script defer src="./index.js"></script>
+    <script src="./node_modules/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light px-5">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">Pokemon Project</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav" >
+            <li class="nav-item">
+              <a class="nav-link" href="#"><i class="bi bi-house"></i> Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="favorite.html"><i class="bi bi-heart"></i> Favorite</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="about.html"><i class="bi bi-info-circle"></i> About</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <!-- <div class="d-flex justify-content-center align-items-center"> -->
+      <input   type="search" name="search" id="search-input" class="search form-control ms-15  d-none" placeholder="Search pokemons..." />
+        <div id="search" class="btn btn-secondary btn-sm mx-5" >
+          
+          <i class="bi bi-search"></i>
+        </div>
+      <!-- </div> -->
+        
+      </nav>
+
+    
+      
+    
+
+    <section id="pokemons" class="pb-4">
+        <div class="container">
+        </div> 
+
+        <div class="container py-4 text-center" id="pagination" >
+
+          <a href="#" class="btn btn-sm btn-primary" id="prev-page"><i class="bi bi-arrow-left"></i></a>
+          <span class="mx-2 current-page"></span>
+          <a href="#" class="btn btn-sm btn-primary" id="next-page"><i class="bi bi-arrow-right"></i></a>
+        </div>
+        
+    </section>
+    <script type="module">
+        import { Pokemons } from './components/Pokemons.js'
+        import { Pokemon } from './components/Pokemons.js'
+
+        const pokemonArray = [];
+        const search = document.querySelector(".serch input")
+
+       
+
+
+        document.querySelector("#search").addEventListener("click", (e)=>{
+          e.preventDefault();
+          document.querySelector(".search").classList.toggle("d-none")
+          
+        })
+
+        let nextUrl = ''
+        let prevUrl = ''
+        function fetchPokemonData(url = 'https://pokeapi.co/api/v2/pokemon/?offset=0&limit=20') {
+        // function fetchPokemonData(url = 'https://pokeapi.co/api/v2/pokemon/bulbasaur') {
+        axios.get(url)
+            .then(response => {
+                if(response.status === 200) {
+                    const pokemons = response.data.results
+                    console.log(response,'response ');
+                    document.querySelector('#pokemons > div').innerHTML = Pokemons(pokemons)
+                    
+                    nextUrl = response.data.next
+                    prevUrl = response.data.previous
+                  
+                    const url = new URL(response.data.next);
+                    const searchParams = new URLSearchParams(url.search);
+                    
+                    const offsetValue = searchParams.get("offset");
+                    document.querySelector('.current-page').innerHTML = offsetValue / 20
+
+
+                }
+              // Process the response and populate the pokemonArray here
+            })
+            .catch(error => {
+              console.error("Error fetching data:", error);
+            });
+
+
+        }
+
+        document.getElementById('prev-page').addEventListener('click', e =>{
+          
+          if(prevUrl !== null){
+            fetchPokemonData(prevUrl);
+          }
+          
+        })
+        
+        document.getElementById('next-page').addEventListener('click', e =>{
+          fetchPokemonData(nextUrl);
+        
+        })
+
+       const search_pokemon = document.querySelector('#search')
+       console.log(search_pokemon);
+        function generatePokemonCards() {
+          // Your generatePokemonCards function here
+        }
+
+
+
+      const search_input = document.querySelector("#search-input");
+
+      if (search_input !== null) {
+        search_input.addEventListener("keyup", (e) => {
+          e.preventDefault();
+          console.log('tu shkru')
+          switch (e.keyCode) {
+            case 13:
+              document.querySelector("#pagination").classList.add("d-none");
+              axios
+                .get(
+                  `https://pokeapi.co/api/v2/pokemon/${e.target.value}`
+                )
+                .then((resp) => {
+                  if (resp.status === 200) {
+                  
+                    document.querySelector('#pokemons > div').innerHTML = Pokemon(resp.data.id, resp.data.name)
+
+                    document.querySelector(
+                      "#pagination span.current-page"
+                    ).innerHTML = resp.data.page;
+                  }
+                });
+              break;
+          }
+        });
+      }
+      
+  
+        // Call the function to fetch Pokemon data and generate the cards
+        fetchPokemonData();
+      </script>
+    <div class="container mt-4">
+        <div class="row">
+          <!-- Pokemon Card 1 -->
+          <div class="row" id="pokemonCardsContainer">
+            <!-- Pokemon cards will be added here -->
+          </div>
+    
+          
+          
+    
+        </div>
+
+    <!-- Bootstrap JS (Optional, only needed if using Bootstrap's JavaScript components) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
